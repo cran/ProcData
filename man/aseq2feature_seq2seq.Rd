@@ -7,8 +7,7 @@
 aseq2feature_seq2seq(aseqs, K, rnn_type = "lstm", n_epoch = 50,
   method = "last", step_size = 1e-04, optimizer_name = "adam",
   samples_train, samples_valid, samples_test = NULL, pca = TRUE,
-  gpu = FALSE, parallel = FALSE, seed = 12345, verbose = TRUE,
-  return_theta = TRUE)
+  verbose = TRUE, return_theta = TRUE)
 }
 \arguments{
 \item{aseqs}{a list of \code{n} action sequences. Each element is an action
@@ -44,12 +43,6 @@ training, validation and test sets for training autoencoder.}
 \item{pca}{logical. If TRUE, the principal components of features are
 returned. Default is TRUE.}
 
-\item{gpu}{logical. If TRUE, use gpu for training when available. Default is FALSE.}
-
-\item{parallel}{logical. If TRUE, allow cpu parallel computing. Default is FALSE.}
-
-\item{seed}{random seed.}
-
 \item{verbose}{logical. If TRUE, training progress is printed.}
 
 \item{return_theta}{logical. If TRUE, extracted features are returned.}
@@ -77,13 +70,16 @@ and the average of the encoder recurrent nenural network if \code{method="avg"}.
 }
 \examples{
 \donttest{
-n <- 50
-seqs <- seq_gen(n)
-seq2seq_res <- aseq2feature_seq2seq(seqs$action_seqs, 5, rnn_type="lstm", n_epoch=5, 
+if (!system("python -c 'import tensorflow as tf'", ignore.stdout = TRUE, ignore.stderr= TRUE)) {
+  n <- 50
+  seqs <- seq_gen(n)
+  seq2seq_res <- aseq2feature_seq2seq(seqs$action_seqs, 5, rnn_type="lstm", n_epoch=5, 
                                    samples_train=1:40, samples_valid=41:50)
-features <- seq2seq_res$theta
-plot(seq2seq_res$train_loss, col="blue", type="l")
-lines(seq2seq_res$valid_loss, col="red")
+  features <- seq2seq_res$theta
+  plot(seq2seq_res$train_loss, col="blue", type="l")
+  lines(seq2seq_res$valid_loss, col="red")
+}
+
 }
 }
 \seealso{
@@ -92,6 +88,7 @@ lines(seq2seq_res$valid_loss, col="red")
 Other feature extraction methods: \code{\link{atseq2feature_seq2seq}},
   \code{\link{seq2feature_mds_large}},
   \code{\link{seq2feature_mds}},
+  \code{\link{seq2feature_ngram}},
   \code{\link{seq2feature_seq2seq}},
   \code{\link{tseq2feature_seq2seq}}
 }

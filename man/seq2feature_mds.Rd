@@ -7,7 +7,7 @@
 seq2feature_mds(seqs = NULL, K = 2, method = "auto",
   dist_type = "oss_action", pca = TRUE, subset_size = 100,
   subset_method = "random", n_cand = 10, return_dist = FALSE,
-  seed = 12345, L_set = 1:3)
+  L_set = 1:3)
 }
 \arguments{
 \item{seqs}{a \code{"\link{proc}"} object or a square matrix. If a squared matrix is 
@@ -32,8 +32,6 @@ in the large data algorithm. See 'Details' and \code{\link{seq2feature_mds_large
 
 \item{return_dist}{logical. If \code{TRUE}, the dissimilarity matrix will be
 returned. Default is \code{FALSE}.}
-
-\item{seed}{random seed.}
 
 \item{L_set}{length of ngrams considered}
 }
@@ -66,12 +64,12 @@ sequence similarity (oss) proposed in Gomez-Alonso and Valls (2008) is used
 for action sequences. If \code{dist_type = "oss_both"}, both action sequences and
 timestamp sequences are used to compute a time-weighted oss. 
   
-The number of
-features to be extracted \code{K} can be selected by cross-validation using
-\code{\link{chooseK_mds}}.
+The number of features to be extracted \code{K} can be selected by cross-validation 
+using \code{\link{chooseK_mds}}.
 }
 \examples{
 n <- 50
+set.seed(12345)
 seqs <- seq_gen(n)
 theta <- seq2feature_mds(seqs, 5)$theta
 }
@@ -82,6 +80,9 @@ Gomez-Alonso, C. and Valls, A. (2008). A similarity measure for sequences of
 
 Paradis, E. (2018). Multidimensional scaling with very large datasets. \emph{
   Journal of Computational and Graphical Statistics}, 27(4), 935-939.
+
+Tang, X., Wang, Z., He, Q., Liu, J., and Ying, Z. (2020) Latent Feature Extraction for 
+  Process Data via Multidimensional Scaling. \emph{Psychometrika}, 85, 378-397.
 }
 \seealso{
 \code{\link{chooseK_mds}} for choosing \code{K}.
@@ -89,6 +90,7 @@ Paradis, E. (2018). Multidimensional scaling with very large datasets. \emph{
 Other feature extraction methods: \code{\link{aseq2feature_seq2seq}},
   \code{\link{atseq2feature_seq2seq}},
   \code{\link{seq2feature_mds_large}},
+  \code{\link{seq2feature_ngram}},
   \code{\link{seq2feature_seq2seq}},
   \code{\link{tseq2feature_seq2seq}}
 }

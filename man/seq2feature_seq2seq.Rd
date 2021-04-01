@@ -8,8 +8,8 @@ seq2feature_seq2seq(seqs, ae_type = "action", K, rnn_type = "lstm",
   n_epoch = 50, method = "last", step_size = 1e-04,
   optimizer_name = "adam", cumulative = FALSE, log = TRUE,
   weights = c(1, 0.5), samples_train, samples_valid,
-  samples_test = NULL, pca = TRUE, gpu = FALSE, parallel = FALSE,
-  seed = 12345, verbose = TRUE, return_theta = TRUE)
+  samples_test = NULL, pca = TRUE, verbose = TRUE,
+  return_theta = TRUE)
 }
 \arguments{
 \item{seqs}{an object of class \code{"\link{proc}"}.}
@@ -55,12 +55,6 @@ training, validation and test sets for training autoencoder.}
 \item{pca}{logical. If TRUE, the principal components of features are
 returned. Default is TRUE.}
 
-\item{gpu}{logical. If TRUE, use gpu for training when available. Default is FALSE.}
-
-\item{parallel}{logical. If TRUE, allow cpu parallel computing. Default is FALSE.}
-
-\item{seed}{random seed.}
-
 \item{verbose}{logical. If TRUE, training progress is printed.}
 
 \item{return_theta}{logical. If TRUE, extracted features are returned.}
@@ -81,34 +75,41 @@ This function wraps \code{\link{aseq2feature_seq2seq}},
 }
 \examples{
 \donttest{ 
-n <- 50
-data(cc_data)
-samples <- sample(1:length(cc_data$seqs$time_seqs), n)
-seqs <- sub_seqs(cc_data$seqs, samples)
+if (!system("python -c 'import tensorflow as tf'", ignore.stdout = TRUE, ignore.stderr= TRUE)) {
+  n <- 50
+  data(cc_data)
+  samples <- sample(1:length(cc_data$seqs$time_seqs), n)
+  seqs <- sub_seqs(cc_data$seqs, samples)
 
-# action sequence autoencoder
-K_res <- chooseK_seq2seq(seqs=seqs, ae_type="action", K_cand=c(5, 10), 
-                         n_epoch=5, n_fold=2, valid_prop=0.2)
-seq2seq_res <- seq2feature_seq2seq(seqs=seqs, ae_type="action", K=K_res$K, 
-                       n_epoch=5, samples_train=1:40, samples_valid=41:50)
-theta <- seq2seq_res$theta
+  # action sequence autoencoder
+  K_res <- chooseK_seq2seq(seqs=seqs, ae_type="action", K_cand=c(5, 10), 
+                           n_epoch=5, n_fold=2, valid_prop=0.2)
+  seq2seq_res <- seq2feature_seq2seq(seqs=seqs, ae_type="action", K=K_res$K, 
+                         n_epoch=5, samples_train=1:40, samples_valid=41:50)
+  theta <- seq2seq_res$theta
 
-# time sequence autoencoder
-K_res <- chooseK_seq2seq(seqs=seqs, ae_type="time", K_cand=c(5, 10), 
-                         n_epoch=5, n_fold=2, valid_prop=0.2)
-seq2seq_res <- seq2feature_seq2seq(seqs=seqs, ae_type="time", K=K_res$K, 
-                       n_epoch=5, samples_train=1:40, samples_valid=41:50)
-theta <- seq2seq_res$theta
+  # time sequence autoencoder
+  K_res <- chooseK_seq2seq(seqs=seqs, ae_type="time", K_cand=c(5, 10), 
+                           n_epoch=5, n_fold=2, valid_prop=0.2)
+  seq2seq_res <- seq2feature_seq2seq(seqs=seqs, ae_type="time", K=K_res$K, 
+                         n_epoch=5, samples_train=1:40, samples_valid=41:50)
+  theta <- seq2seq_res$theta
 
-# action and time sequence autoencoder
-K_res <- chooseK_seq2seq(seqs=seqs, ae_type="both", K_cand=c(5, 10), 
-                         n_epoch=5, n_fold=2, valid_prop=0.2)
-seq2seq_res <- seq2feature_seq2seq(seqs=seqs, ae_type="both", K=K_res$K, 
-                       n_epoch=5, samples_train=1:40, samples_valid=41:50)
-theta <- seq2seq_res$theta
-plot(seq2seq_res$train_loss, col="blue", type="l")
-lines(seq2seq_res$valid_loss, col="red")
+  # action and time sequence autoencoder
+  K_res <- chooseK_seq2seq(seqs=seqs, ae_type="both", K_cand=c(5, 10), 
+                           n_epoch=5, n_fold=2, valid_prop=0.2)
+  seq2seq_res <- seq2feature_seq2seq(seqs=seqs, ae_type="both", K=K_res$K, 
+                         n_epoch=5, samples_train=1:40, samples_valid=41:50)
+  theta <- seq2seq_res$theta
+  plot(seq2seq_res$train_loss, col="blue", type="l")
+  lines(seq2seq_res$valid_loss, col="red")
 }
+}
+}
+\references{
+Tang, X., Wang, Z., Liu, J., and Ying, Z. (2020) An exploratory analysis of the latent 
+  structure of process data via action sequence autoencoders. \emph{British Journal of 
+  Mathematical and Statistical Psychology}. 74(1), 1-33.
 }
 \seealso{
 \code{\link{chooseK_seq2seq}} for choosing \code{K} through cross-validation.
@@ -117,6 +118,7 @@ Other feature extraction methods: \code{\link{aseq2feature_seq2seq}},
   \code{\link{atseq2feature_seq2seq}},
   \code{\link{seq2feature_mds_large}},
   \code{\link{seq2feature_mds}},
+  \code{\link{seq2feature_ngram}},
   \code{\link{tseq2feature_seq2seq}}
 }
 \concept{feature extraction methods}

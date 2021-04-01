@@ -25,21 +25,25 @@
 #' @seealso \code{\link{chooseK_seq2seq}} for choosing \code{K} through cross-validation.
 #' @examples
 #' \donttest{
-#' n <- 50
-#' seqs <- seq_gen(n)
-#' seq2seq_res <- aseq2feature_seq2seq(seqs$action_seqs, 5, rnn_type="lstm", n_epoch=5, 
+#' if (!system("python -c 'import tensorflow as tf'", ignore.stdout = TRUE, ignore.stderr= TRUE)) {
+#'   n <- 50
+#'   seqs <- seq_gen(n)
+#'   seq2seq_res <- aseq2feature_seq2seq(seqs$action_seqs, 5, rnn_type="lstm", n_epoch=5, 
 #'                                    samples_train=1:40, samples_valid=41:50)
-#' features <- seq2seq_res$theta
-#' plot(seq2seq_res$train_loss, col="blue", type="l")
-#' lines(seq2seq_res$valid_loss, col="red")
+#'   features <- seq2seq_res$theta
+#'   plot(seq2seq_res$train_loss, col="blue", type="l")
+#'   lines(seq2seq_res$valid_loss, col="red")
+#' }
+#' 
 #' }
 #' @export
 aseq2feature_seq2seq <- function(aseqs, K, rnn_type="lstm", n_epoch=50, method="last", 
                                 step_size=0.0001, optimizer_name="adam", 
                                 samples_train, samples_valid, samples_test=NULL, 
-                                pca=TRUE, gpu=FALSE, parallel=FALSE, seed=12345,
+                                pca=TRUE, 
+                                #gpu=FALSE, parallel=FALSE, seed=12345,
                                 verbose=TRUE, return_theta=TRUE) {
-  use_session_with_seed(seed, disable_gpu = !gpu, disable_parallel_cpu = !parallel)
+  #use_session_with_seed(seed, disable_gpu = !gpu, disable_parallel_cpu = !parallel)
   #tensorflow::use_compat("v1")
   if (!(rnn_type %in% c("lstm", "gru"))) 
     stop("Invalid rnn_type! Available options: lstm, gru.\n")
@@ -66,7 +70,7 @@ aseq2feature_seq2seq <- function(aseqs, K, rnn_type="lstm", n_epoch=50, method="
     target_seqs[[index_seq]] <- array(onehot_mat, dim=c(1,n_l, n_event))
   }
   
-  if (!gpu) Sys.setenv(CUDA_VISIBLE_DEVICES = "")
+  Sys.setenv(CUDA_VISIBLE_DEVICES = "")
   
   # Define keras model
   # Define an input sequence and process it.
@@ -225,25 +229,30 @@ aseq2feature_seq2seq <- function(aseqs, K, rnn_type="lstm", n_epoch=50, method="
 #' @seealso \code{\link{chooseK_seq2seq}} for choosing \code{K} through cross-validation.
 #' @examples
 #' \donttest{
-#' n <- 50
-#' data(cc_data)
-#' samples <- sample(1:length(cc_data$seqs$time_seqs), n)
-#' tseqs <- cc_data$seqs$time_seqs[samples]
-#' time_seq2seq_res <- tseq2feature_seq2seq(tseqs, 5, rnn_type="lstm", n_epoch=5, 
+#' if (!system("python -c 'import tensorflow as tf'", ignore.stdout = TRUE, ignore.stderr= TRUE)) {
+#'   n <- 50
+#'   data(cc_data)
+#'   samples <- sample(1:length(cc_data$seqs$time_seqs), n)
+#'   tseqs <- cc_data$seqs$time_seqs[samples]
+#'   time_seq2seq_res <- tseq2feature_seq2seq(tseqs, 5, rnn_type="lstm", n_epoch=5, 
 #'                                    samples_train=1:40, samples_valid=41:50)
-#' features <- time_seq2seq_res$theta
-#' plot(time_seq2seq_res$train_loss, col="blue", type="l",
+#'   features <- time_seq2seq_res$theta
+#'   plot(time_seq2seq_res$train_loss, col="blue", type="l",
 #'      ylim = range(c(time_seq2seq_res$train_loss, time_seq2seq_res$valid_loss)))
-#' lines(time_seq2seq_res$valid_loss, col="red", type = 'l')
+#'   lines(time_seq2seq_res$valid_loss, col="red", type = 'l')
+#' }
+#' 
 #' }
 #' @export
 tseq2feature_seq2seq <- function(tseqs, K, cumulative = FALSE, log = TRUE, rnn_type="lstm",
                                  n_epoch=50, method="last", step_size=0.0001, 
                                  optimizer_name="rmsprop", samples_train, samples_valid, 
-                                 samples_test=NULL, pca=TRUE, gpu=FALSE, parallel=FALSE, 
-                                 seed=12345, verbose=TRUE, return_theta=TRUE) {
+                                 samples_test=NULL, pca=TRUE, 
+                                 #gpu=FALSE, parallel=FALSE, 
+                                 #seed=12345, 
+                                 verbose=TRUE, return_theta=TRUE) {
   
-  use_session_with_seed(seed, disable_gpu = !gpu, disable_parallel_cpu = !parallel)
+  #use_session_with_seed(seed, disable_gpu = !gpu, disable_parallel_cpu = !parallel)
   if (!(rnn_type %in% c("lstm", "gru"))) 
     stop("Invalid rnn_type! Available options: lstm, gru.\n")
   if (!(method %in% c("last", "avg"))) 
@@ -272,7 +281,7 @@ tseq2feature_seq2seq <- function(tseqs, K, cumulative = FALSE, log = TRUE, rnn_t
     }
   }
   
-  if (!gpu) Sys.setenv(CUDA_VISIBLE_DEVICES = "")
+  Sys.setenv(CUDA_VISIBLE_DEVICES = "")
   
   # Define keras model
   # Define an input sequence and process it.
@@ -434,27 +443,30 @@ tseq2feature_seq2seq <- function(tseqs, K, cumulative = FALSE, log = TRUE, rnn_t
 #' @seealso \code{\link{chooseK_seq2seq}} for choosing \code{K} through cross-validation.
 #' @examples
 #' \donttest{
-#' n <- 50
-#' data(cc_data)
-#' samples <- sample(1:length(cc_data$seqs$time_seqs), n)
-#' atseqs <- sub_seqs(cc_data$seqs, samples)
-#' action_and_time_seq2seq_res <- atseq2feature_seq2seq(atseqs, 5, rnn_type="lstm", n_epoch=5, 
+#' if (!system("python -c 'import tensorflow as tf'", ignore.stdout = TRUE, ignore.stderr= TRUE)) {
+#'   n <- 50
+#'   data(cc_data)
+#'   samples <- sample(1:length(cc_data$seqs$time_seqs), n)
+#'   atseqs <- sub_seqs(cc_data$seqs, samples)
+#'   action_and_time_seq2seq_res <- atseq2feature_seq2seq(atseqs, 5, rnn_type="lstm", n_epoch=5, 
 #'                                    samples_train=1:40, samples_valid=41:50)
-#' features <- action_and_time_seq2seq_res$theta
-#' plot(action_and_time_seq2seq_res$train_loss, col="blue", type="l",
-#'      ylim = range(c(action_and_time_seq2seq_res$train_loss, 
-#'                     action_and_time_seq2seq_res$valid_loss)))
-#' lines(action_and_time_seq2seq_res$valid_loss, col="red", type = 'l')
+#'   features <- action_and_time_seq2seq_res$theta
+#'   plot(action_and_time_seq2seq_res$train_loss, col="blue", type="l",
+#'        ylim = range(c(action_and_time_seq2seq_res$train_loss, 
+#'                       action_and_time_seq2seq_res$valid_loss)))
+#'   lines(action_and_time_seq2seq_res$valid_loss, col="red", type = 'l')
+#' }
 #' }
 #' @export
 atseq2feature_seq2seq <- function(atseqs, K, weights = c(1, .5), cumulative = FALSE, 
                                   log = TRUE, rnn_type="lstm", n_epoch=50, method="last", 
                                   step_size=0.0001, optimizer_name="rmsprop", 
                                   samples_train, samples_valid, samples_test=NULL, 
-                                  pca=TRUE, gpu=FALSE, parallel=FALSE, seed=12345,
+                                  pca=TRUE, 
+                                  #gpu=FALSE, parallel=FALSE, seed=12345,
                                   verbose=TRUE, return_theta=TRUE) {
   
-  use_session_with_seed(seed, disable_gpu = !gpu, disable_parallel_cpu = !parallel)
+  # use_session_with_seed(seed, disable_gpu = !gpu, disable_parallel_cpu = !parallel)
   if (!(rnn_type %in% c("lstm", "gru"))) 
     stop("Invalid rnn_type! Available options: lstm, gru.\n")
   if (!(method %in% c("last", "avg"))) 
@@ -509,7 +521,7 @@ atseq2feature_seq2seq <- function(atseqs, K, weights = c(1, .5), cumulative = FA
     }
   }
   
-  if (!gpu) Sys.setenv(CUDA_VISIBLE_DEVICES = "")
+  Sys.setenv(CUDA_VISIBLE_DEVICES = "")
   
   # Define keras model
   # Define inputs and process it.

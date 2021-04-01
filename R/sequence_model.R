@@ -78,49 +78,51 @@ K2string <- function(K_emb, K_rnn, K_hidden = NULL, include_time, rnn_type) {
 #' @seealso \code{\link{predict.seqm}} for the \code{predict} method for \code{seqm} objects.
 #' @examples
 #' \donttest{
-#' n <- 100
-#' data(cc_data)
-#' samples <- sample(1:length(cc_data$responses), n)
-#' seqs <- sub_seqs(cc_data$seqs, samples)
+#' if (!system("python -c 'import tensorflow as tf'", ignore.stdout = TRUE, ignore.stderr= TRUE)) {
+#'   n <- 100
+#'   data(cc_data)
+#'   samples <- sample(1:length(cc_data$responses), n)
+#'   seqs <- sub_seqs(cc_data$seqs, samples)
 #' 
-#' y <- cc_data$responses[samples]
-#' x <- matrix(rnorm(n*2), ncol=2)
+#'   y <- cc_data$responses[samples]
+#'   x <- matrix(rnorm(n*2), ncol=2)
 #' 
-#' index_test <- 91:100
-#' index_train <- 1:90
-#' seqs_train <- sub_seqs(seqs, index_train)
-#' seqs_test <- sub_seqs(seqs, index_test)
+#'   index_test <- 91:100
+#'   index_train <- 1:90
+#'   seqs_train <- sub_seqs(seqs, index_train)
+#'   seqs_test <- sub_seqs(seqs, index_test)
 #' 
-#' actions <- unique(unlist(seqs$action_seqs))
+#'   actions <- unique(unlist(seqs$action_seqs))
 #' 
-#' ## no covariate is used
-#' res1 <- seqm(seqs = seqs_train, response = y[index_train], 
-#'              response_type = "binary", actions=actions, K_emb = 5, K_rnn = 5, 
-#'              n_epoch = 5)
-#' pred_res1 <- predict(res1, new_seqs = seqs_test)
+#'   ## no covariate is used
+#'   res1 <- seqm(seqs = seqs_train, response = y[index_train], 
+#'                response_type = "binary", actions=actions, K_emb = 5, K_rnn = 5, 
+#'                n_epoch = 5)
+#'   pred_res1 <- predict(res1, new_seqs = seqs_test)
 #' 
-#' mean(as.numeric(pred_res1 > 0.5) == y[index_test])
+#'   mean(as.numeric(pred_res1 > 0.5) == y[index_test])
 #' 
-#' ## add more fully connected layers after the recurrent layer.
-#' res2 <- seqm(seqs = seqs_train, response = y[index_train],
-#'              response_type = "binary", actions=actions, K_emb = 5, K_rnn = 5, 
-#'              n_hidden=2, K_hidden=c(10,5), n_epoch = 5)
-#' pred_res2 <- predict(res2, new_seqs = seqs_test)
-#' mean(as.numeric(pred_res2 > 0.5) == y[index_test])
+#'   ## add more fully connected layers after the recurrent layer.
+#'   res2 <- seqm(seqs = seqs_train, response = y[index_train],
+#'                response_type = "binary", actions=actions, K_emb = 5, K_rnn = 5, 
+#'                n_hidden=2, K_hidden=c(10,5), n_epoch = 5)
+#'   pred_res2 <- predict(res2, new_seqs = seqs_test)
+#'   mean(as.numeric(pred_res2 > 0.5) == y[index_test])
 #' 
-#' ## add covariates
-#' res3 <- seqm(seqs = seqs_train, response = y[index_train], 
-#'              covariates = x[index_train, ],
-#'              response_type = "binary", actions=actions, 
-#'              K_emb = 5, K_rnn = 5, n_epoch = 5)
-#' pred_res3 <- predict(res3, new_seqs = seqs_test, 
-#'                      new_covariates=x[index_test, ])
+#'   ## add covariates
+#'   res3 <- seqm(seqs = seqs_train, response = y[index_train], 
+#'                covariates = x[index_train, ],
+#'                response_type = "binary", actions=actions, 
+#'                K_emb = 5, K_rnn = 5, n_epoch = 5)
+#'   pred_res3 <- predict(res3, new_seqs = seqs_test, 
+#'                        new_covariates=x[index_test, ])
 #'                      
-#' ## include time sequences
-#' res4 <- seqm(seqs = seqs_train, response = y[index_train], 
-#'              response_type = "binary", actions=actions,
-#'              include_time=TRUE, K_emb=5, K_rnn=5, n_epoch=5)
-#' pred_res4 <- predict(res4, new_seqs = seqs_test)
+#'   ## include time sequences
+#'   res4 <- seqm(seqs = seqs_train, response = y[index_train], 
+#'                response_type = "binary", actions=actions,
+#'                include_time=TRUE, K_emb=5, K_rnn=5, n_epoch=5)
+#'   pred_res4 <- predict(res4, new_seqs = seqs_test)
+#' }
 #' }
 #' @export
 seqm <- function(seqs, response, covariates = NULL, response_type, 
@@ -130,8 +132,10 @@ seqm <- function(seqs, response, covariates = NULL, response_type,
                  K_hidden = NULL, index_valid = 0.2, 
                  verbose = FALSE, 
                  max_len = NULL, n_epoch = 20, batch_size = 16, optimizer_name = "rmsprop", 
-                 step_size = 0.001, gpu = FALSE, parallel = FALSE, seed = 12345) {
-  use_session_with_seed(seed, disable_gpu = !gpu, disable_parallel_cpu = !parallel)
+                 step_size = 0.001
+                 #, gpu = FALSE, parallel = FALSE, seed = 12345
+                 ) {
+  #use_session_with_seed(seed, disable_gpu = !gpu, disable_parallel_cpu = !parallel)
   n_person <- length(seqs$action_seqs)
   if (is.null(actions)) events <- unique(unlist(seqs$action_seqs))
   else {
@@ -202,7 +206,7 @@ seqm <- function(seqs, response, covariates = NULL, response_type,
     }
   }
   
-  if (!gpu) Sys.setenv(CUDA_VISIBLE_DEVICES = "")
+  Sys.setenv(CUDA_VISIBLE_DEVICES = "")
   
   # build keras model
   seq_inputs <- layer_input(shape=list(max_len))
